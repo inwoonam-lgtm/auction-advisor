@@ -1,28 +1,28 @@
-# charts.py — Plotly 인터랙티브 차트
+# charts.py — Plotly 인터랙티브 차트 (라이트 테마)
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 
-DARK = dict(
-    paper_bgcolor='#0d1117',
-    plot_bgcolor='#161b22',
-    font_color='#e6edf3',
-    gridcolor='#30363d',
+LIGHT = dict(
+    paper_bgcolor='#ffffff',
+    plot_bgcolor='#f8fafc',
+    font_color='#1e293b',
+    gridcolor='#e2e8f0',
 )
 SC_COLOR = {
-    '낙관 (+12%)': '#10b981',
-    '기준 (±0%)':  '#3b82f6',
-    '비관 (-8%)':  '#ef4444',
+    '낙관 (+12%)': '#059669',
+    '기준 (±0%)':  '#2563eb',
+    '비관 (-8%)':  '#dc2626',
 }
 
 
 def _base_layout(**kwargs) -> dict:
     return dict(
-        paper_bgcolor=DARK['paper_bgcolor'],
-        plot_bgcolor=DARK['plot_bgcolor'],
-        font=dict(color=DARK['font_color'], family='Noto Sans KR, sans-serif', size=12),
+        paper_bgcolor=LIGHT['paper_bgcolor'],
+        plot_bgcolor=LIGHT['plot_bgcolor'],
+        font=dict(color=LIGHT['font_color'], family='Noto Sans KR, sans-serif', size=12),
         margin=dict(l=50, r=30, t=50, b=40),
-        legend=dict(bgcolor='#1f2937', bordercolor='#30363d', borderwidth=1),
+        legend=dict(bgcolor='#f1f5f9', bordercolor='#e2e8f0', borderwidth=1),
         **kwargs,
     )
 
@@ -41,18 +41,17 @@ def chart_profit_line(df: pd.DataFrame) -> go.Figure:
             textfont=dict(size=10, color=SC_COLOR[sc]),
             hovertemplate='%{y:,.0f}만원<extra>' + sc + '</extra>',
         ))
-    fig.add_hline(y=0, line_dash='dash', line_color='#6e7681', opacity=0.6)
+    fig.add_hline(y=0, line_dash='dash', line_color='#94a3b8', opacity=0.6)
     fig.update_layout(
         **_base_layout(title='📈 보유기간별 세후 순수익'),
-        xaxis=dict(title='보유기간 (년)', gridcolor=DARK['gridcolor'], tickvals=df['보유기간'].unique()),
-        yaxis=dict(title='세후 순수익 (만원)', gridcolor=DARK['gridcolor']),
+        xaxis=dict(title='보유기간 (년)', gridcolor=LIGHT['gridcolor'], tickvals=df['보유기간'].unique()),
+        yaxis=dict(title='세후 순수익 (만원)', gridcolor=LIGHT['gridcolor']),
     )
     return fig
 
 
 def chart_roi_bar(df: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
-    hold_vals = sorted(df['보유기간'].unique())
     for sc in df['시나리오'].unique():
         sub = df[df['시나리오'] == sc]
         fig.add_trace(go.Bar(
@@ -62,13 +61,13 @@ def chart_roi_bar(df: pd.DataFrame) -> go.Figure:
             marker_color=SC_COLOR[sc],
             text=[f"{v:.1f}%" for v in sub['연환산수익률']],
             textposition='outside',
-            textfont=dict(size=10),
+            textfont=dict(size=10, color=SC_COLOR[sc]),
             hovertemplate='연환산 %{y:.2f}%<extra>' + sc + '</extra>',
         ))
     fig.update_layout(
         **_base_layout(title='📊 연환산 수익률 비교', barmode='group'),
-        xaxis=dict(title='보유기간', gridcolor=DARK['gridcolor']),
-        yaxis=dict(title='연환산 수익률 (%)', gridcolor=DARK['gridcolor']),
+        xaxis=dict(title='보유기간', gridcolor=LIGHT['gridcolor']),
+        yaxis=dict(title='연환산 수익률 (%)', gridcolor=LIGHT['gridcolor']),
     )
     return fig
 
@@ -88,7 +87,6 @@ def chart_cost_waterfall(buy: dict, scenario_row: pd.Series) -> go.Figure:
         scenario_row['세후순수익'],
     ]
     measures = ['absolute'] + ['relative'] * 7 + ['total']
-    colors = ['#3b82f6'] + ['#ef4444'] * 7 + ['#10b981' if values[-1] >= 0 else '#ef4444']
 
     fig = go.Figure(go.Waterfall(
         name='비용 흐름',
@@ -96,18 +94,18 @@ def chart_cost_waterfall(buy: dict, scenario_row: pd.Series) -> go.Figure:
         measure=measures,
         x=labels,
         y=[v / 10_000 for v in values],
-        connector=dict(line=dict(color='#30363d', dash='dot')),
-        increasing=dict(marker_color='#10b981'),
-        decreasing=dict(marker_color='#ef4444'),
-        totals=dict(marker_color='#3b82f6'),
+        connector=dict(line=dict(color='#cbd5e1', dash='dot')),
+        increasing=dict(marker_color='#059669'),
+        decreasing=dict(marker_color='#dc2626'),
+        totals=dict(marker_color='#2563eb'),
         text=[f"{v/10_000:+,.0f}" for v in values],
         textposition='outside',
-        textfont=dict(size=10),
+        textfont=dict(size=10, color='#1e293b'),
     ))
     fig.update_layout(
         **_base_layout(title='💧 비용 흐름 (워터폴)'),
-        yaxis=dict(title='금액 (만원)', gridcolor=DARK['gridcolor']),
-        xaxis=dict(gridcolor=DARK['gridcolor']),
+        yaxis=dict(title='금액 (만원)', gridcolor=LIGHT['gridcolor']),
+        xaxis=dict(gridcolor=LIGHT['gridcolor']),
     )
     return fig
 
@@ -124,10 +122,6 @@ def chart_realdata_scatter(api_df: pd.DataFrame) -> go.Figure:
         color_discrete_sequence=px.colors.qualitative.Set2,
     )
     fig.update_layout(**_base_layout())
-    fig.update_traces(
-        hovertemplate='<b>%{customdata[0]|%Y-%m}</b><br>면적: %{x:.1f}㎡<br>'
-                      '금액: %{y:,.0f}원<br>층: %{customdata[1]}<extra></extra>'
-    )
     return fig
 
 
@@ -140,23 +134,26 @@ def chart_price_trend(api_df: pd.DataFrame) -> go.Figure:
     fig = go.Figure([
         go.Scatter(
             x=monthly['deal_date'], y=monthly['max'] / 10_000,
-            fill=None, mode='lines', line_color='rgba(59,130,246,0.3)', name='최고가',
+            fill=None, mode='lines',
+            line_color='rgba(37,99,235,0.25)', name='최고가',
         ),
         go.Scatter(
             x=monthly['deal_date'], y=monthly['min'] / 10_000,
-            fill='tonexty', mode='lines', line_color='rgba(59,130,246,0.3)',
-            fillcolor='rgba(59,130,246,0.08)', name='최저가',
+            fill='tonexty', mode='lines',
+            line_color='rgba(37,99,235,0.25)',
+            fillcolor='rgba(37,99,235,0.07)', name='최저가',
         ),
         go.Scatter(
             x=monthly['deal_date'], y=monthly['mean'] / 10_000,
-            mode='lines+markers', line=dict(color='#3b82f6', width=2.5),
+            mode='lines+markers',
+            line=dict(color='#2563eb', width=2.5),
             marker=dict(size=6), name='평균가',
             hovertemplate='%{x|%Y-%m}<br>평균: %{y:,.0f}만원<extra></extra>',
         ),
     ])
     fig.update_layout(
         **_base_layout(title='📉 월별 실거래가 추이'),
-        xaxis=dict(title='거래월', gridcolor=DARK['gridcolor']),
-        yaxis=dict(title='거래금액 (만원)', gridcolor=DARK['gridcolor']),
+        xaxis=dict(title='거래월', gridcolor=LIGHT['gridcolor']),
+        yaxis=dict(title='거래금액 (만원)', gridcolor=LIGHT['gridcolor']),
     )
     return fig

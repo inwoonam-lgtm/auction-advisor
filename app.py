@@ -21,41 +21,101 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── 글로벌 CSS ─────────────────────────────────────────────
+# ── 글로벌 CSS (라이트 테마) ──────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif !important; }
 
+/* 전체 배경·텍스트 */
+.main .block-container { background: #ffffff; color: #1e293b; }
+
 /* 메트릭 카드 */
 [data-testid="metric-container"] {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 12px 16px !important;
 }
-[data-testid="stMetricValue"] { font-size: 22px !important; font-weight: 700; }
+[data-testid="stMetricValue"] {
+    font-size: 22px !important;
+    font-weight: 700;
+    color: #1e293b !important;
+}
+[data-testid="stMetricLabel"] { color: #64748b !important; font-size: 12px !important; }
+[data-testid="stMetricDelta"] { font-size: 12px !important; }
 
 /* 탭 */
-[data-testid="stTabs"] button { font-size: 13px; }
+[data-testid="stTabs"] button { font-size: 13px; color: #475569; }
 [data-testid="stTabs"] button[aria-selected="true"] {
-    color: #3b82f6 !important;
-    border-bottom: 2px solid #3b82f6;
+    color: #2563eb !important;
+    border-bottom: 2px solid #2563eb;
+    font-weight: 600;
 }
 
 /* 사이드바 */
-[data-testid="stSidebar"] { background: #0d1117; }
+[data-testid="stSidebar"] { background: #f8fafc; border-right: 1px solid #e2e8f0; }
+[data-testid="stSidebar"] label { color: #374151 !important; font-size: 13px; }
 [data-testid="stSidebar"] .block-container { padding-top: 1rem; }
+
+/* 입력 위젯 */
+[data-testid="stNumberInput"] input,
+[data-testid="stTextInput"] input {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px;
+}
+.stSlider [data-testid="stMarkdownContainer"] p { color: #374151 !important; }
+
+/* 버튼 */
+.stButton > button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-weight: 600;
+    padding: 6px 16px;
+    transition: background 0.2s;
+}
+.stButton > button:hover { background: #1d4ed8; }
 
 /* 경고/성공 배너 */
 .stAlert { border-radius: 8px !important; }
 
 /* 테이블 */
-.dataframe th { background: #1f2937 !important; color: #8b949e !important; }
-.dataframe td { font-size: 12.5px !important; }
+.dataframe th {
+    background: #f1f5f9 !important;
+    color: #374151 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+.dataframe td { font-size: 12.5px !important; color: #1e293b !important; }
+.dataframe tr:hover td { background: #f8fafc !important; }
+
+/* expander */
+[data-testid="stExpander"] {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background: #f8fafc;
+}
 
 /* 구분선 */
-hr { border-color: #30363d !important; }
+hr { border-color: #e2e8f0 !important; }
+
+/* caption */
+.stCaption { color: #64748b !important; font-size: 12px; }
+
+/* markdown 일반 텍스트 */
+.stMarkdown p, .stMarkdown li { color: #1e293b !important; }
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #0f172a !important; }
+
+/* 체크박스 */
+[data-testid="stCheckbox"] label { color: #374151 !important; }
+
+/* selectbox */
+[data-testid="stSelectbox"] label { color: #374151 !important; }
+[data-testid="stMultiSelect"] label { color: #374151 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -291,15 +351,15 @@ with tab3:
             pct = val / buy['총투입원가'] * 100
             st.markdown(
                 f"<div style='display:flex;justify-content:space-between;"
-                f"padding:8px 0;border-bottom:1px solid #30363d;font-size:13px'>"
-                f"<span style='color:#8b949e'>{name}</span>"
-                f"<span><b>{fmt_won(val)}</b> <span style='color:#6e7681;font-size:11px'>({pct:.1f}%)</span></span>"
+                f"padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:13px'>"
+                f"<span style='color:#64748b'>{name}</span>"
+                f"<span><b>{fmt_won(val)}</b> <span style='color:#94a3b8;font-size:11px'>({pct:.1f}%)</span></span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         st.markdown(
             f"<div style='display:flex;justify-content:space-between;"
-            f"padding:12px 0;font-size:15px;font-weight:700;color:#3b82f6'>"
+            f"padding:12px 0;font-size:15px;font-weight:700;color:#2563eb'>"
             f"<span>총 투입원가</span><span>{fmt_won(buy['총투입원가'])}</span></div>",
             unsafe_allow_html=True
         )
@@ -317,7 +377,7 @@ with tab3:
             textfont=dict(size=12, color='#e6edf3'),
         ))
         fig_pie.update_layout(
-            paper_bgcolor='#0d1117', font=dict(color='#e6edf3'),
+            paper_bgcolor='#ffffff', font=dict(color='#1e293b'),
             title='부대비용 구성', margin=dict(t=40, b=10),
             showlegend=False,
         )
@@ -440,7 +500,7 @@ with tab5:
             inp_p = p['inputs']
             bid_r = inp_p['bid_price'] / inp_p['market_price'] * 100
             col_name, col_info, col_del = st.columns([3, 5, 1])
-            col_name.markdown(f"**{p['name']}**  \n<span style='color:#6e7681;font-size:11px'>{p['saved_at']}</span>",
+            col_name.markdown(f"**{p['name']}**  \n<span style='color:#94a3b8;font-size:11px'>{p['saved_at']}</span>",
                               unsafe_allow_html=True)
             col_info.markdown(
                 f"낙찰가 **{int(inp_p['bid_price']/10000):,}만** | "
@@ -521,14 +581,14 @@ with tab5:
                             name=row['물건명'][:12],
                         ))
                     fig_radar.update_layout(
-                        paper_bgcolor='#0d1117',
+                        paper_bgcolor='#ffffff',
                         polar=dict(
-                            bgcolor='#161b22',
-                            radialaxis=dict(visible=True, color='#6e7681'),
-                            angularaxis=dict(color='#8b949e'),
+                            bgcolor='#f8fafc',
+                            radialaxis=dict(visible=True, color='#94a3b8'),
+                            angularaxis=dict(color='#64748b'),
                         ),
-                        font=dict(color='#e6edf3', family='Noto Sans KR'),
-                        legend=dict(bgcolor='#1f2937', bordercolor='#30363d'),
+                        font=dict(color='#1e293b', family='Noto Sans KR'),
+                        legend=dict(bgcolor='#f1f5f9', bordercolor='#e2e8f0'),
                         margin=dict(t=40, b=20),
                         height=400,
                     )
@@ -603,7 +663,7 @@ with tab6:
 # ── 푸터 ──────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
-    "<div style='text-align:center;color:#6e7681;font-size:11px'>"
+    "<div style='text-align:center;color:#94a3b8;font-size:11px'>"
     "⚠️ 본 분석은 참고용이며 실제 세금은 개인 상황에 따라 다릅니다. "
     "투자 전 세무사 확인을 권장합니다."
     "</div>",
